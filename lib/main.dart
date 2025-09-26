@@ -62,6 +62,7 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   String input = ''; // Stores the user's input
   String result = ''; // Stores the calculation results
+  bool lastPressedEquals = false;
   
   // Handles which buttons are pressed 
   void _buttonPressed(String value) {
@@ -73,9 +74,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       // Calculate the result of the equation
       } else if (value == '=') {
         _calculateResult();
+        lastPressedEquals = true; // checks if = was pressed
       } else {
-        // Adds the pressed button's value to the input string
-        input += value;
+        // If the new value pressed is a number, expression clears and user begins fresh
+        if (lastPressedEquals) {
+          // Starts new expression if = was previously pressed
+          if (RegExp(r'[0-9.]').hasMatch(value)) {
+            input = value;
+            result = '';
+          } else {
+            // Continues previous expression if operator is pressed previously
+            input = result + value;
+            result = '';
+          }
+          lastPressedEquals = false;
+        } else {input += value;}
       }
     });
   }
