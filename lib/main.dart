@@ -63,6 +63,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String input = ''; // Stores the user's input
   String result = ''; // Stores the calculation results
   bool lastPressedEquals = false;
+
+  // Stores history of calculations
+  List<String> history = [];
   
   // Handles which buttons are pressed 
   void _buttonPressed(String value) {
@@ -104,6 +107,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ContextModel cm = ContextModel();
       double eval = exp.evaluate(EvaluationType.REAL, cm);
       result = eval.toStringAsFixed(3); // Rounds the result to 3 decimal places
+
+      // Saves calculation history
+      setState(() {
+        history.insert(0, '$input = $result'); // Saves the newest calculation first
+        if (history.length > 10) {
+          history.removeLast(); // Keeps the last 10 calculations and removes the oldest one as new ones enter the list
+        }
+      });
     } catch (e) {
       // Handles any invalid inputs
       result = 'Invalid Input(s)';
@@ -186,7 +197,33 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ),
 
-          SizedBox(height: MediaQuery.of(context).size.height * 0.08), // Adjusts the placement of the buttons so they do not overflow off the edge of the screen
+          // History 
+          Expanded(
+            flex: 1,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              alignment: Alignment.topRight,
+              child: ListView.builder (
+                reverse: true, // show the most recent calculations at the bottom
+                itemCount: history.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        input = history[index].split(" = ")[0];
+                        result = '';
+                      });
+                    },
+                    child: Text(
+                      history[index],
+                      style: TextStyle(fontSize: 16, color: textColor),
+                      textAlign: TextAlign.right,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
 
           // Arrange the calculator buttons in rows and columns
           Expanded(
@@ -245,4 +282,4 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ),
     );
   }
-}
+} 
